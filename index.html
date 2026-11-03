@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Battle of Ai — Escape Room</title>
+<style>
+:root {
+  --site-primary: #172536;
+  --site-on-primary: #f4f0e7;
+  --site-secondary: #8a6840;
+  --site-on-secondary: #fffaf1;
+  --site-background: #101820;
+  --site-on-background: #eee9df;
+  --site-font-body: Georgia, 'Times New Roman', serif;
+  --site-font-heading: 'Arial Narrow', Impact, sans-serif;
+  color-scheme: light dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--site-background); color: var(--site-on-background); font-family: var(--site-font-body); }
+#app { min-height: 100vh; width: 100%; background-color: var(--site-background); color: var(--site-on-background); position: relative; overflow: hidden; }
+.ambient { position: absolute; inset: 0; pointer-events: none; opacity: 1; background: radial-gradient(ellipse at 50% 0%, rgba(173,135,83,.17), transparent 55%), repeating-linear-gradient(135deg, transparent 0 38px, rgba(255,255,255,.012) 39px 40px); }
+.shell { width: min(1040px, 100%); margin: auto; padding: 28px 20px 60px; position: relative; }
+.topline { display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid rgba(207,181,139,.3); padding-bottom:14px; color:#c8b89e; font: 11px/1.4 Arial,sans-serif; letter-spacing:.2em; text-transform:uppercase; }
+.brand { display:flex; align-items:center; gap:10px; }
+.seal { width:30px;height:30px;border:1px solid #a98759;display:grid;place-items:center;color:#d7bd91;font: bold 15px Georgia; transform:rotate(45deg); }
+.seal span { transform:rotate(-45deg); }
+.kicker { color:#c6a879; font: 11px Arial,sans-serif; letter-spacing:.24em; text-transform:uppercase; }
+h1,h2,h3 { font-family:var(--site-font-heading), Impact, sans-serif; text-transform:uppercase; letter-spacing:.045em; font-weight:600; }
+h1 { font-size:clamp(42px,8vw,82px); line-height:.92; margin:16px 0; }
+h2 { font-size:clamp(27px,5vw,42px); margin:10px 0 14px; }
+h3 { font-size:20px; margin:0 0 10px; }
+p { line-height:1.65; color:#d4d0c8; }
+.muted { color:#aaa69d; }
+.gold { color:#d4b17a; }
+.hero { padding:clamp(38px,8vw,84px) 0 32px; max-width:780px; }
+.hero .subtitle { font: 13px Arial,sans-serif; letter-spacing:.19em; color:#c7bba8; text-transform:uppercase; }
+.rule { width:84px; height:2px; background:#a98759; margin:24px 0; }
+.panel { border:1px solid rgba(202,174,130,.35); background:linear-gradient(145deg,rgba(31,45,58,.96),rgba(20,29,38,.97)); padding:clamp(20px,4vw,34px); box-shadow:0 18px 55px rgba(0,0,0,.2); border-radius:3px; }
+.intro-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:18px; align-items:stretch; }
+.side-note { border-left:2px solid #8a6840; padding:5px 0 5px 18px; color:#c9c2b6; font-size:14px; line-height:1.7; }
+label { display:block; font:11px Arial,sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#c9b48f; margin:18px 0 8px; }
+input { width:100%; max-width:420px; background:#0d151d; border:1px solid #59616a; color:#fff8ec; padding:14px 15px; font:16px Georgia,serif; border-radius:2px; outline:none; }
+input:focus { border-color:#d4b17a; box-shadow:0 0 0 2px rgba(212,177,122,.15); }
+button { cursor:pointer; border:1px solid #c4a16d; background:#a47c48; color:#101820; padding:13px 19px; font: bold 11px Arial,sans-serif; letter-spacing:.16em; text-transform:uppercase; border-radius:2px; transition:.18s ease; }
+button:hover { background:#d1b17f; transform:translateY(-1px); }
+button.secondary { background:transparent; color:#d8c5a6; border-color:#74634c; }
+button.secondary:hover { background:rgba(255,255,255,.06); }
+button:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+.hidden { display:none !important; }
+.statusbar { display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center; margin:24px 0 16px; }
+.team-chip,.timer,.progress-chip { border:1px solid rgba(202,174,130,.3); padding:10px 13px; background:rgba(10,16,22,.55); font:11px Arial,sans-serif; letter-spacing:.1em; text-transform:uppercase; }
+.timer strong { color:#f0c987; font: bold 22px 'Courier New',monospace; margin-left:8px; letter-spacing:.06em; }
+.timer.urgent strong { color:#ff8c76; }
+.progress-track { height:4px; background:#35404a; margin:0 0 22px; }
+.progress-fill { height:100%; width:0; background:#c09a65; transition:width .35s; }
+.doorhead { display:flex; justify-content:space-between; gap:15px; align-items:flex-start; border-bottom:1px solid rgba(202,174,130,.25); padding-bottom:17px; margin-bottom:20px; }
+.door-number { color:#c6a879; font:11px Arial,sans-serif; letter-spacing:.2em; }
+.scripture { color:#d7bd91; font:italic 14px Georgia,serif; }
+.clue { background:rgba(9,15,21,.55); border:1px solid rgba(202,174,130,.22); padding:18px; margin:18px 0; }
+.clue p { margin:8px 0; }
+.codebox { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+.codebox input { max-width:220px; text-transform:uppercase; letter-spacing:.18em; }
+.feedback { min-height:24px; font:12px Arial,sans-serif; margin-top:10px; color:#e0b17a; }
+.hint { border-left:2px solid #a98759; padding:10px 14px; background:rgba(169,135,89,.09); color:#d4c8b4; font-size:14px; line-height:1.55; margin-top:14px; }
+.gridcode { display:grid; grid-template-columns:repeat(5,minmax(35px,54px)); gap:5px; margin:16px 0; }
+.gridcode span { display:grid; place-items:center; aspect-ratio:1; background:#273542; border:1px solid #53606b; color:#f0e7d7; font:14px 'Courier New',monospace; }
+.coords { font:13px 'Courier New',monospace; color:#e4c895; letter-spacing:.08em; }
+.evidence-list { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:14px 0; }
+.evidence { border:1px solid #56606a; padding:13px 8px; text-align:center; background:#202e3a; color:#e8dfd0; font:11px Arial,sans-serif; letter-spacing:.08em; }
+.sequence { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:14px 0; }
+.sequence div { border:1px dashed #897451; padding:12px 6px; text-align:center; color:#dfd3c1; font-size:13px; }
+.dial-lock { display:grid; grid-template-columns:repeat(3,minmax(65px,90px)); gap:12px; margin:18px 0; }
+.dial { text-align:center; border:1px solid #8a704c; background:#101a23; padding:12px 8px; }
+.dial output { display:block; color:#f0c987; font:bold 30px 'Courier New',monospace; margin:8px 0; }
+.dial input { padding:0; accent-color:#c09a65; }
+.leaderboard { margin-top:22px; border:1px solid rgba(202,174,130,.3); padding:18px; background:rgba(9,15,21,.55); }
+.leaderboard table { width:100%; border-collapse:collapse; text-align:left; font:13px Arial,sans-serif; }
+.leaderboard th,.leaderboard td { padding:10px 7px; border-bottom:1px solid rgba(202,174,130,.18); }
+.leaderboard th { color:#d7bd91; text-transform:uppercase; letter-spacing:.1em; font-size:10px; }
+.leaderboard input { max-width:150px; }
+.success { border:1px solid #8d754f; background:rgba(134,105,62,.13); padding:14px; margin:16px 0; color:#e6d6b9; }
+.finaltime { font:clamp(30px,7vw,54px) 'Courier New',monospace; color:#e5c58e; margin:10px 0; }
+.footer { margin-top:35px; border-top:1px solid rgba(202,174,130,.2); padding-top:15px; color:#898b88; font:10px Arial,sans-serif; letter-spacing:.13em; text-transform:uppercase; display:flex; justify-content:space-between; gap:10px; }
+@media(max-width:680px) { .intro-grid {grid-template-columns:1fr;} .statusbar {grid-template-columns:1fr 1fr;} .team-chip {grid-column:1/-1;} .evidence-list {grid-template-columns:1fr;} .sequence {grid-template-columns:1fr 1fr;} .topline {font-size:9px;} }
+@media (prefers-color-scheme: light) { body,#app { background-color:var(--site-background); } }
+</style>
+</head>
+<body>
+<div id="app">
+<div class="ambient"></div>
+<div class="shell">
+  <div class="topline"><div class="brand"><div class="seal"><span>✦</span></div><span>Field Investigation / 07</span></div><span>Joshua 7–8 · Classified Record</span></div>
+
+  <section id="welcome">
+    <div class="hero">
+      <div class="kicker">An interactive Bible escape room</div>
+      <h1>The Battle<br><span class="gold">of Ai</span></h1>
+      <div class="subtitle">Behind closed doors · Joshua 7–8</div>
+      <div class="rule"></div>
+      <p>Jericho had fallen. Israel had seen the power of God firsthand. The next battle should have been simple. But at Ai, confidence turned into defeat—and something hidden inside the camp had to be brought into the light.</p>
+      <p class="muted">Your team has <strong class="gold">30 minutes</strong> to examine the evidence, unlock ten doors, and uncover what happened.</p>
+    </div>
+    <div class="intro-grid">
+      <div class="panel">
+        <div class="kicker">Team registration</div>
+        <h3>Enter the investigation</h3>
+        <label for="teamName">Team name</label>
+        <input id="teamName" maxlength="28" placeholder="Enter your team name" autocomplete="off">
+        <div class="actions"><button id="startBtn">Begin investigation →</button></div>
+      </div>
+      <div class="panel">
+        <div class="kicker">Mission parameters</div>
+        <h3>Before you begin</h3>
+        <div class="side-note">Read each piece of evidence carefully. Every door has a code. Scripture references are part of the evidence—not optional reading. Some locks require you to manipulate a combination mechanism. You may request a hint, but each hint adds a two-minute penalty to your final time.</div>
+        <p class="muted" style="font-size:12px;margin-top:18px">One device per team works best. Keep your team together and record your finish time when you escape.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="statusbar">
+      <div class="team-chip">Team <strong id="teamDisplay">—</strong></div>
+      <div class="progress-chip">Doors <strong id="doorCount">0 / 10</strong></div>
+      <div class="timer" id="timerBox">TIME REMAINING <strong id="timer">30:00</strong></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="panel" id="puzzlePanel"></div>
+    <div class="footer"><span>Case file: Joshua 7–8</span><span>Bring the truth into the light</span></div>
+  </section>
+
+  <section id="finish" class="hidden">
+    <div class="hero">
+      <div class="kicker">Investigation complete</div>
+      <h1 id="finishTitle">The door is open.</h1>
+      <div class="rule"></div>
+      <p id="finishCopy"></p>
+    </div>
+    <div class="panel">
+      <div class="kicker">Official team result</div>
+      <h2 id="finishTeam">Team</h2>
+      <div class="finaltime" id="finishTime">00:00</div>
+      <p id="penaltyCopy" class="muted"></p>
+      <div class="success"><strong>Final record · Joshua 8:1</strong><br>After the hidden sin was dealt with, God told Joshua, “Do not be afraid or discouraged.” The story does not end at Ai. God gives Joshua direction to move forward.</div>
+      <h3>Take it beyond the game</h3>
+      <p>Israel’s story in Joshua 7 is a specific moment in Israel’s history. It is not a formula that says every hard thing in life is caused by hidden sin. But it does remind us that hiding sin is not the same as dealing with it.</p>
+      <p>What would it look like to bring something you have been hiding into the light—with God, and with a trusted, wise person if you need help?</p>
+      <p class="scripture">Read: Psalm 139:23–24 · Proverbs 28:13 · 1 John 1:7–9</p>
+      <div class="actions"><button id="restartBtn">Play again</button><button class="secondary" id="printBtn">Print team result</button></div>
+      <div class="leaderboard" id="leaderboard"><div class="kicker">Local leaderboard</div><h3>Team rankings</h3><p class="muted">Results saved on this device only. For a class-wide board, enter every team’s result on the same teacher/projector device.</p><div id="leaderboardRows"></div><label for="manualTeam">Add another team’s result (teacher entry)</label><div class="actions"><input id="manualTeam" maxlength="28" placeholder="Team name"><input id="manualTime" type="number" min="1" max="1800" placeholder="Seconds"><button id="addResultBtn">Save result</button></div></div>
+    </div>
+    <div class="footer"><span>End of case file</span><span>Walk in the light · 1 John 1:7</span></div>
+  </section>
+</div>
+</div>
+<script>
+(() => {
+  const TOTAL = 30 * 60;
+  const puzzles = [
+    {
+      title: 'False Confidence', ref: 'Joshua 7:2–5', door: 'Door 01 / The First Report',
+      story: 'Israel sent men to scout Ai. The report sounded confident: the city was small, and only a portion of the army seemed necessary. But the attack ended in retreat.',
+      task: 'Open <strong>Joshua 7:4–5</strong>. Read the account of Israel’s retreat carefully. How many Israelite men were struck down during the first attack? Enter the number recorded in the passage.',
+      answer: '36', hint: 'The number is written directly in Joshua 7:5. It is the number of men who fell as Israel retreated.',
+      feedback: 'The report is verified. The first door opens.'
+    },
+    {
+      title: 'The Hidden Evidence', ref: 'Joshua 7:10–13 · Hebrews 4:13', door: 'Door 02 / The Evidence Grid',
+      story: 'The defeat was not simply a military problem. God told Joshua that Israel had sinned and that devoted things had been taken and hidden.',
+      task: 'Read <strong>Joshua 7:11–12</strong> to investigate what Israel had done with what was devoted to destruction. Then use the coordinates to decode the five-letter word connected to the hidden action. Coordinates are ROW–COLUMN; begin at the top left.',
+      grid: true, coords: '4–5 / 1–1 / 3–1 / 1–5 / 3–4', answer: 'TAKEN',
+      hint: 'Read each pair as row first, then column. For example, 1–1 is the top-left square.',
+      feedback: 'The evidence points to what was taken—and concealed.'
+    },
+    {
+      title: 'Follow the Evidence', ref: 'Joshua 7:20–21', door: 'Door 03 / The Inventory',
+      story: 'Investigators have reached Achan’s own confession. The details of what he took—and what he did with it afterward—are recorded in the testimony.',
+      task: 'Turn to <strong>Joshua 7:20–21</strong>. In verse 21, Achan names the items he took and gives a weight for two of them. What is the combined weight, in shekels, of the silver and the gold? Enter the total.',
+      answer: '250', hint: 'Find the number of shekels of silver and the number of shekels of gold. Add those two weights.',
+      feedback: 'The inventory matches Achan’s confession.'
+    },
+    {
+      title: 'Bring It into the Light', ref: 'Joshua 7:19–26 · 1 John 1:7–9',
+      door: 'Door 04 / The Final Sequence',
+      story: 'Joshua called Achan to tell the truth. Achan described the progression of his actions.',
+      task: 'Read <strong>Joshua 7:21</strong>. Put Achan’s four actions in the order he describes them. Enter the four card numbers in that order.',
+      sequence: true, answer: '4132',
+      hint: 'The order is: saw, coveted, took, hid. Match each action to its card number.',
+      feedback: 'The sequence is confirmed.'
+    },
+    {
+      title:'The Search Begins', ref:'Joshua 7:14–15', door:'Door 05 / The Selection Process',
+      story:'The Lord gave Joshua a process for identifying the person responsible.',
+      task:'Read <strong>Joshua 7:14–15</strong>. How many levels of selection are named before the guilty individual is identified? Count tribe, clan, family, household, and individual.',
+      answer:'5', hint:'Trace the narrowing process in verse 14, then include the individual in verse 15.', feedback:'The search procedure is understood.'
+    },
+    {
+      title:'The Family Record', ref:'Joshua 7:16–18', door:'Door 06 / The Lineage File',
+      story:'The next morning Joshua brought Israel forward by tribe, clan, household, and man.',
+      task:'Read <strong>Joshua 7:16–18</strong>. What tribe did Achan belong to?',
+      answer:'JUDAH', hint:'The tribe is named in Joshua 7:16.', feedback:'The family record matches.'
+    },
+    {
+      title:'The Confession', ref:'Joshua 7:19–21', door:'Door 07 / The Confession Record',
+      story:'Joshua urged Achan to give glory to God and tell the truth.',
+      task:'Read <strong>Joshua 7:20–21</strong>. What weight of gold does Achan report, in shekels?',
+      answer:'50', hint:'The silver is 200 shekels. Find the separate gold amount in verse 21.', feedback:'The confession record is complete.'
+    },
+    {
+      title:'The Movable Lock', ref:'Joshua 7:21–22', door:'Door 08 / The Combination Vault',
+      story:'The evidence is hidden beneath the tent. Use the figures Achan gave in his confession to set the three dials.',
+      task:'Read <strong>Joshua 7:21</strong>. Set the dials to the silver amount, gold amount, and combined total—in that order.',
+      movable:true, answer:'200-50-250',
+      hint:'The three figures are 200, 50, and their sum.', feedback:'The combination lock turns.'
+    },
+    {
+      title:'Under the Tent', ref:'Joshua 7:22–23', door:'Door 09 / The Recovery Site',
+      story:'Joshua sent messengers, who ran to the tent. The stolen items were found where Achan had hidden them.',
+      task:'Read <strong>Joshua 7:22–23</strong>. Where did the messengers find the devoted things? Give the specific place in two words.',
+      answer:'IN TENT', hint:'Verse 22 says they found the items in Achan’s tent.', feedback:'The hidden items have been recovered.'
+    },
+    {
+      title:'A New Instruction', ref:'Joshua 8:1–2', door:'Door 10 / The Next Mission',
+      story:'The case does not end with the discovery. God speaks to Joshua again and gives him direction for the next battle.',
+      task:'Read <strong>Joshua 8:1–2</strong>. What city does God tell Joshua to attack next?',
+      answer:'AI', hint:'The city is named in the first sentence of Joshua 8:1.', feedback:'All ten doors are open.'
+    }
+  ];
+
+  let team = '', startedAt = 0, timerInterval = null;
+  let hintsUsed = 0, current = 0, finished = false;
+  const $ = id => document.getElementById(id);
+  const normalize = s => s.trim().toUpperCase().replace(/\s+/g, '');
+
+  function show(id) {
+    ['welcome','game','finish'].forEach(x =>
+      $(x).classList.toggle('hidden', x !== id)
+    );
+  }
+
+  function formatTime(seconds) {
+    const n = Math.max(0, Math.floor(seconds));
+    return String(Math.floor(n/60)).padStart(2,'0') + ':' +
+      String(n%60).padStart(2,'0');
+  }
+
+  function updateTimer() {
+    if (!startedAt || finished) return;
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    const left = Math.max(0, TOTAL - elapsed);
+    $('timer').textContent = formatTime(left);
+    $('timerBox').classList.toggle('urgent', left <= 300);
+    if (left === 0) finishGame(true);
+  }
+
+  function startGame() {
+    team = $('teamName').value.trim() || 'Team Unknown';
+    startedAt = Date.now();
+    current = 0;
+    hintsUsed = 0;
+    finished = false;
+    $('teamDisplay').textContent = team;
+    show('game');
+    renderPuzzle();
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 250);
+  }
+
+  function renderPuzzle() {
+    const p = puzzles[current];
+    $('doorCount').textContent = current + ' / 10';
+    $('progress').style.width = (current / 10 * 100) + '%';
+
+    let extra = '';
+
+    if (p.grid) {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXY'.split('');
+      extra = '<div class="clue"><div class="kicker">Coordinate cipher</div>' +
+        '<div class="gridcode">' +
+        letters.map(l => '<span>'+l+'</span>').join('') +
+        '</div><p class="coords">' + p.coords +
+        '</p><p class="muted">Coordinates: row–column · Read left to right</p></div>';
+    }
+
+    if (p.sequence) {
+      extra = '<div class="clue"><div class="kicker">Evidence cards</div>' +
+        '<div class="sequence">' +
+        '<div><strong>1</strong><br>I saw</div>' +
+        '<div><strong>2</strong><br>I hid</div>' +
+        '<div><strong>3</strong><br>I took</div>' +
+        '<div><strong>4</strong><br>I coveted</div>' +
+        '</div><p class="muted">Use Joshua 7:21 to put the cards in order.</p></div>';
+    }
+
+    if (p.movable) {
+      extra = '<div class="clue"><div class="kicker">Mechanical combination lock</div>' +
+        '<p>Move each dial to set its number.</p><div class="dial-lock">' +
+        ['Silver','Gold','Total'].map((name,i) =>
+          '<div class="dial"><div class="kicker">'+name+'</div>' +
+          '<output id="dialValue'+i+'">0</output>' +
+          '<input aria-label="'+name+' dial" id="dial'+i+
+          '" type="range" min="0" max="250" value="0" step="1" ' +
+          'oninput="document.getElementById(\'dialValue'+i+
+          '\').textContent=this.value"></div>'
+        ).join('') + '</div></div>';
+    }
+
+    $('puzzlePanel').innerHTML = `
+      <div class="doorhead">
+        <div>
+          <div class="door-number">${p.door}</div>
+          <h2>${p.title}</h2>
+          <div class="scripture">Scripture to investigate: ${p.ref}</div>
+        </div>
+        <div class="kicker">Locked</div>
+      </div>
+      <p>${p.story}</p>
+      <div class="clue"><div class="kicker">Your assignment</div><p>${p.task}</p></div>
+      ${extra}
+      <div class="codebox ${p.movable ? 'hidden' : ''}">
+        <div><label for="answer">Enter door code</label>
+        <input id="answer" autocomplete="off" placeholder="ENTER CODE"></div>
+        <button id="unlockBtn">Unlock door</button>
+      </div>
+      ${p.movable ? '<div class="actions"><button id="testDialBtn">Test combination</button></div>' : ''}
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="actions"><button class="secondary" id="hintBtn">Request a hint · +2 min</button></div>
+      <div id="hintArea"></div>`;
+
+    if ($('unlockBtn')) $('unlockBtn').addEventListener('click', checkAnswer);
+
+    if (p.movable) {
+      $('testDialBtn').addEventListener('click', () => {
+        $('answer').value = ['dial0','dial1','dial2']
+          .map(id => $(id).value).join('-');
+        checkAnswer();
+      });
+    }
+
+    if ($('answer')) {
+      $('answer').addEventListener('keydown', e => {
+        if (e.key === 'Enter') checkAnswer();
+      });
+      $('answer').focus();
+    }
+
+    $('hintBtn').addEventListener('click', () => {
+      if (!$('hintArea').textContent) {
+        hintsUsed++;
+        $('hintArea').innerHTML =
+          '<div class="hint"><strong>FIELD NOTE</strong><br>' +
+          p.hint + '</div>';
+        $('feedback').textContent =
+          'Hint used. Two minutes will be added to your final time.';
+      }
+    });
+  }
+
+  function checkAnswer() {
+    const input = $('answer');
+    const given = input.value.trim().toUpperCase();
+    const expected = puzzles[current].answer.toUpperCase();
+
+    if (given.replace(/\s+/g,'') === expected.replace(/\s+/g,'')) {
+      $('feedback').textContent = puzzles[current].feedback;
+      if ($('unlockBtn')) $('unlockBtn').disabled = true;
+      if (input) input.disabled = true;
+      $('hintBtn').disabled = true;
+
+      const next = document.createElement('div');
+      next.className = 'actions';
+      next.innerHTML =
+        `<button id="nextBtn">${current === 9 ? 'Open the final door →' : 'Proceed to next door →'}</button>`;
+      $('puzzlePanel').appendChild(next);
+
+      $('nextBtn').addEventListener('click', () => {
+        current++;
+        if (current >= puzzles.length) finishGame(false);
+        else renderPuzzle();
+      });
+    } else {
+      $('feedback').textContent =
+        'That code does not release the lock. Recheck the evidence and try again.';
+      if (input) input.select();
+    }
+  }
+
+  function getResults() {
+    try {
+      return JSON.parse(localStorage.getItem('aiEscapeLeaderboard') || '[]');
+    } catch(e) { return []; }
+  }
+
+  function saveResult(name, seconds) {
+    const rows = getResults();
+    rows.push({name, seconds});
+    rows.sort((a,b) => a.seconds - b.seconds);
+    localStorage.setItem('aiEscapeLeaderboard', JSON.stringify(rows.slice(0,50)));
+  }
+
+  function renderLeaderboard() {
+    const rows = getResults();
+    $('leaderboardRows').innerHTML = rows.length
+      ? '<table><thead><tr><th>Rank</th><th>Team</th><th>Adjusted time</th></tr></thead><tbody>' +
+        rows.map((r,i) =>
+          '<tr><td>'+(i+1)+'</td><td>'+
+          String(r.name).replace(/[&<>"']/g,c =>
+            ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+
+          '</td><td>'+formatTime(r.seconds)+'</td></tr>'
+        ).join('') + '</tbody></table>'
+      : '<p class="muted">No completed teams recorded yet.</p>';
+  }
+
+  function finishGame(timeExpired) {
+    if (finished) return;
+    finished = true;
+    clearInterval(timerInterval);
+
+    const raw = Math.floor((Date.now() - startedAt) / 1000);
+    const penalty = hintsUsed * 120;
+    const finalSeconds = raw + penalty;
+
+    $('progress').style.width = '100%';
+    $('finishTitle').textContent = timeExpired
+      ? 'Time has expired.' : 'The door is open.';
+    $('finishCopy').textContent = timeExpired
+      ? 'Your team reached the end of the 30-minute window. Review the evidence together and try again.'
+      : 'Your team worked through the evidence and unlocked every door. Record your time and compare it with the other teams.';
+    $('finishTeam').textContent = team;
+    $('finishTime').textContent = formatTime(finalSeconds);
+    $('penaltyCopy').textContent =
+      `${hintsUsed} hint(s) used · ${formatTime(raw)} elapsed + ${formatTime(penalty)} penalty`;
+
+    if (!timeExpired) saveResult(team, finalSeconds);
+    renderLeaderboard();
+    show('finish');
+  }
+
+  $('startBtn').addEventListener('click', startGame);
+  $('teamName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startGame();
+  });
+  $('restartBtn').addEventListener('click', () => {
+    $('teamName').value = team;
+    show('welcome');
+  });
+  $('printBtn').addEventListener('click', () => window.print());
+
+  $('addResultBtn').addEventListener('click', () => {
+    const name = $('manualTeam').value.trim();
+    const seconds = Number($('manualTime').value);
+    if (!name || !Number.isFinite(seconds) || seconds < 1 || seconds > 1800) return;
+    saveResult(name, seconds);
+    $('manualTeam').value = '';
+    $('manualTime').value = '';
+    renderLeaderboard();
+  });
+})();
+</script>
+</body>
+</html>
